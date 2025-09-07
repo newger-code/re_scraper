@@ -1,0 +1,229 @@
+{
+  "realm": "picket",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "requiredCredentials": [
+    "password"
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "User privileges"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator privileges"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "elaraone",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": [
+        "http://localhost:1350/*",
+        "http://localhost:3000/*",
+        "http://localhost:3001/*",
+        "http://localhost:10080/*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "scopeMappings": [
+    {
+      "client": "elaraone",
+      "roles": [
+        "resident",
+        "property_manager",
+        "owner"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "q",
+      "enabled": true,
+      "email": "q@someyard.local",
+      "firstName": "Q",
+      "lastName": "Shay",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "admin"
+      ],
+      "clientRoles": {
+        "account": [
+          "view-profile",
+          "manage-account"
+        ],
+        "realm-management": [
+          "view-realm",
+          "view-identity-providers",
+          "manage-identity-providers",
+          "impersonation",
+          "realm-admin",
+          "create-client",
+          "manage-users",
+          "query-realms",
+          "view-authorization",
+          "query-clients",
+          "query-users",
+          "manage-events",
+          "manage-realm",
+          "view-events",
+          "view-users",
+          "view-clients",
+          "manage-authorization",
+          "manage-clients",
+          "query-groups"
+        ],
+        "elaraone": [
+          "property_manager",
+          "resident",
+          "concierge"
+        ]
+      }
+    },
+    {
+      "username": "yalla",
+      "enabled": true,
+      "email": "yalla@someyard.local",
+      "firstName": "Yalla",
+      "lastName": "Wla",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "admin"
+      ],
+      "clientRoles": {
+        "account": [
+          "view-profile",
+          "manage-account"
+        ],
+        "elaraone": [
+          "concierge"
+        ]
+      }
+    },
+    {
+      "username": "grumpy",
+      "enabled": true,
+      "email": "grumpy@somyard.local",
+      "firstName": "Groman",
+      "lastName": "Agryiov",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "clientRoles": {
+        "account": [
+          "view-profile",
+          "manage-account"
+        ],
+        "elaraone": [
+          "concierge",
+          "property_manager"
+        ]
+      }
+    },
+    {
+      "username": "sprout",
+      "enabled": true,
+      "email": "srpout@somyard.local",
+      "firstName": "Brussels",
+      "lastName": "Sprout",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "clientRoles": {
+        "account": [
+          "view-profile",
+          "manage-account"
+        ],
+        "elaraone": [
+          "resident",
+          "property_manager"
+        ]
+      }
+    },
+    {
+      "username": "pongho",
+      "enabled": true,
+      "email": "pongo@somyard.local",
+      "firstName": "Pong",
+      "lastName": "Hot-Ho",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "clientRoles": {
+        "account": [
+          "view-profile",
+          "manage-account"
+        ],
+        "elaraone": [
+          "resident"
+        ]
+      }
+    },
+    {
+      "username": "chuvak",
+      "enabled": true,
+      "email": "chuvak@somyard.local",
+      "firstName": "Ginormous",
+      "lastName": "Puncher",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ],
+      "clientRoles": {
+        "account": [
+          "view-profile",
+          "manage-account"
+        ],
+        "elaraone": [
+          "resident",
+          "concierge",
+          "property_manager"
+        ]
+      }
+    }
+  ]
+}

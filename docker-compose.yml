@@ -1,0 +1,19 @@
+version: '3'
+
+volumes:
+  postgres_data:
+    driver: local
+
+services:
+  books_db:
+    image: library/postgres:latest
+    container_name: books_db
+    volumes:
+      - ./etc/db/:/docker-entrypoint-initdb.d/
+    environment:
+      POSTGRES_USER: picket
+      POSTGRES_PASSWORD: picket
+      POSTGRES_DB: books
+    ports:
+      - 6432:5432
+
