@@ -1,0 +1,18 @@
+[2m2025-09-07T18:32:41.835884Z[0m [[32m[1minfo     [0m] [1mINVESTIGATION: Starting process for[0m [36maddress[0m=[35m'1240 Pondview Ave, Akron, OH 44305'[0m
+[2m2025-09-07T18:32:41.836417Z[0m [[32m[1minfo     [0m] [1mINVESTIGATION: Starting Homes.com scrape[0m [36murl[0m=[35mhttps://www.homes.com/property/1240-Pondview-Ave,-Akron,-OH-44305/[0m
+[2m2025-09-07T18:32:52.476625Z[0m [[32m[1minfo     [0m] [1mBrowser page created successfully.[0m [36msource[0m=[35mHomes.com[0m
+[2m2025-09-07T18:32:52.937284Z[0m [[32m[1minfo     [0m] [1mSuccessfully navigated and fetched content.[0m [36msource[0m=[35mHomes.com[0m [36murl[0m=[35mhttps://www.homes.com/property/1240-Pondview-Ave,-Akron,-OH-44305/[0m
+[2m2025-09-07T18:32:53.790833Z[0m [[32m[1minfo     [0m] [1mINVESTIGATION: Finished process for[0m [36maddress[0m=[35m'1240 Pondview Ave, Akron, OH 44305'[0m
+--- HOMES.COM PAGE CONTENT ---
+<html><head>
+<title>Access Denied</title>
+</head><body>
+<h1>Access Denied</h1>
+
+You don't have permission to access "http://www.homes.com/property/1240-Pondview-Ave,-Akron,-OH-44305/" on this server.<p>
+Reference #18.8963ca17.1757269972.7f3b2acc
+</p><p>https://errors.edgesuite.net/18.8963ca17.1757269972.7f3b2acc</p>
+
+
+</body></html>
+--- END HOMES.COM PAGE CONTENT ---

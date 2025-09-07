@@ -1,0 +1,27 @@
+# Core Application & Web
+fastapi
+uvicorn
+python-dotenv
+sqlalchemy
+psycopg2-binary
+structlog
+
+# Address Normalization
+# pypostal-multiarch # Swapped out due to environment issues.
+usaddress
+
+# Web Scraping & Automation
+playwright
+playwright-stealth
+beautifulsoup4
+requests
+
+# Data Validation
+pydantic
+
+# Testing
+pytest
+
+# County Data Extraction
+arcgis
+google-generativeai
