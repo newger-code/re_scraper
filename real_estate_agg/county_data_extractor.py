@@ -1,118 +1,77 @@
-from arcgis.gis import GIS
-from arcgis.features import FeatureLayer
-import google.generativeai as genai
-from config import settings
+import requests
+import zipfile
+import geopandas
+import os
+from io import BytesIO
 from logging_config import setup_logging
 
 logger = setup_logging()
 
-# --- Hardcoded County to ArcGIS Server URL Mapping ---
-COUNTY_ARCGIS_ENDPOINTS = {
-    "cook county": "https://wwws.cookcountyil.gov/cookviewer/rest/services/cookviewer_query/MapServer",
-    # ... more counties would be added here
+# A map of county names to their bulk data download URLs.
+COUNTY_BULK_DATA_URLS = {
+    "summit county": "https://fiscaloffice.summitoh.net/index.php/component/jdownloads/finish/68-parcels/503-parcels"
 }
 
-def get_data_from_arcgis(county: str, address: str) -> dict:
+def download_and_process_county_data(county: str) -> bool:
     """
-    Connects to a county's ArcGIS server and queries for parcel data.
+    Downloads, unzips, and processes a county's bulk parcel data.
     """
-    endpoint = COUNTY_ARCGIS_ENDPOINTS.get(county.lower())
-    if not endpoint:
-        logger.warning("No ArcGIS endpoint configured for county", county=county)
-        return None
+    county_lower = county.lower()
+    if county_lower not in COUNTY_BULK_DATA_URLS:
+        logger.warning("No bulk data URL configured for county", county=county)
+        return False
+
+    url = COUNTY_BULK_DATA_URLS[county_lower]
 
     try:
-        gis = GIS() # Anonymous connection
-        layer_url = f"{endpoint}/0" # A common pattern is that the first layer (index 0) is the parcel layer.
-        feature_layer = FeatureLayer(layer_url, gis)
+        logger.info("Downloading bulk data", county=county, url=url)
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
 
-        logger.info("Attempting to query ArcGIS feature layer", layer_url=layer_url)
+        zip_file = BytesIO(response.content)
 
-        # This is a guess for the field name. Common names are 'SITE_ADDRESS', 'FULL_ADDR', etc.
-        # This will need to be customized for each county's schema.
-        where_clause = f"upper(SITE_ADDRESS) = '{address.upper()}'"
+        temp_dir = f"/tmp/{county_lower}_parcels"
+        os.makedirs(temp_dir, exist_ok=True)
 
-        parcels = feature_layer.query(where=where_clause, out_fields='*')
+        with zipfile.ZipFile(zip_file) as zf:
+            zf.extractall(temp_dir)
+            logger.info("Successfully extracted zip file", path=temp_dir)
 
-        if len(parcels.features) > 0:
-            parcel = parcels.features[0]
-            attributes = parcel.attributes
-            logger.info("Found parcel data on ArcGIS server", attributes=attributes)
-            # Map the attributes to our internal schema
-            return {
-                "source": "arcgis",
-                "assessed_value": attributes.get("ASSESSED_VALUE_FIELD_NAME"), # Placeholder field name
-                "owner": attributes.get("OWNER_NAME_FIELD_NAME") # Placeholder field name
-            }
-        else:
-            logger.warning("No parcel found for address on ArcGIS server", address=address)
-            return None
+        shapefile_path = None
+        for file in os.listdir(temp_dir):
+            if file.endswith(".shp"):
+                shapefile_path = os.path.join(temp_dir, file)
+                break
 
+        if not shapefile_path:
+            logger.error("No .shp file found in the extracted archive.", county=county)
+            return False
+
+        logger.info("Reading shapefile with geopandas", path=shapefile_path)
+        gdf = geopandas.read_file(shapefile_path)
+
+        print(f"--- {county.upper()} PARCEL DATA (HEAD) ---")
+        print(gdf.head())
+        print("------------------------------------------")
+
+        return True
+
+    except requests.exceptions.RequestException as e:
+        logger.error("Failed to download bulk data file", county=county, error=str(e))
+        return False
+    except zipfile.BadZipFile:
+        logger.error("Downloaded file is not a valid zip file.", county=county)
+        return False
     except Exception as e:
-        logger.error("Failed to get data from ArcGIS", county=county, error=str(e), exc_info=True)
-        return None
+        logger.error("An error occurred during bulk data processing", county=county, error=str(e), exc_info=True)
+        return False
 
-def get_data_with_llm(county: str, address: str) -> dict:
-    # ... (rest of the file is unchanged) ...
-    return {"error": "Not implemented"}
-
-
-def get_county_data(normalized_address: dict) -> dict:
+def get_county_data(county_name: str) -> dict:
     """
-    Main entry point for acquiring county-level data for a property.
-    It orchestrates the dual-strategy approach.
-
-    Our target schema for the returned dictionary is:
-    - parcel_id: The unique county identifier (APN/PIN).
-    - full_address: The property's location address.
-    - legal_description: The legal description of the property.
-    - land_use_code: e.g., Residential, Commercial.
-    - property_class: e.g., Single Family, Condo.
-    - acreage or lot_size_sqft.
-    - building_sqft.
-    - year_built.
-    - market_value: Total assessed market value.
-    - assessed_value: The value used for tax calculations.
-    - tax_year.
-    - annual_property_tax.
-    - last_sale_date.
-    - last_sale_price.
-    - taxes_owed_or_due.
-    - last_tax_amount_paid.
-    - last_tax_paid_date.
-    - delinquent_tax_amount.
-    - notice_of_default_date.
-    - owner_name.
-    - owner_mailing_address.
-    - tax_mailing_address.
-    - mortgage_amount.
-    - mortgage_date.
-    - lender_name.
+    Main entry point for acquiring county-level data.
     """
-    if not normalized_address or not normalized_address.get('components'):
-        return {"error": "Invalid normalized address provided."}
-
-    components = normalized_address['components']
-    county = components.get('county')
-    full_address = normalized_address.get('canonical')
-
-    if not county:
-        logger.warning("County not found in normalized address components.", address=full_address)
-        return {"error": "County not found in address"}
-
-    logger.info("Starting county data extraction", county=county, address=full_address)
-
-    # 1. Try the primary strategy: ArcGIS API
-    arcgis_data = get_data_from_arcgis(county, full_address)
-    if arcgis_data:
-        logger.info("Successfully retrieved data from ArcGIS", county=county)
-        return arcgis_data
-
-    # 2. If that fails, try the fallback strategy: LLM scraping
-    llm_data = get_data_with_llm(county, full_address)
-    if llm_data and not llm_data.get("error"):
-        logger.info("Successfully retrieved data using LLM fallback", county=county)
-        return llm_data
-
-    logger.error("All county data extraction strategies failed.", county=county, address=full_address)
-    return {"error": "All county data extraction strategies failed"}
+    success = download_and_process_county_data(county_name)
+    if success:
+        return {"status": "success", "message": f"Successfully processed bulk data for {county_name}."}
+    else:
+        return {"status": "error", "message": f"Failed to process bulk data for {county_name}."}

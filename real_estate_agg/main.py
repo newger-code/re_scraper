@@ -12,6 +12,8 @@ from scrapers.zillow_scraper import ZillowScraper
 from scrapers.redfin_scraper import RedfinScraper
 from scrapers.realtor_scraper import RealtorScraper
 from scrapers.movoto_scraper import MovotoScraper
+from etl import run_master_etl
+from county_data_extractor import get_county_data
 
 # --- FastAPI App Initialization ---
 app = FastAPI(
@@ -26,7 +28,7 @@ class ScrapeRequest(BaseModel):
     addresses: List[str]
 
 class CountyScrapeRequest(BaseModel):
-    address: str
+    county_name: str
 
 # --- Event Handlers ---
 @app.on_event("startup")
@@ -40,7 +42,7 @@ def on_startup():
 @app.get("/", tags=["Health Check"])
 def read_root():
     """Root endpoint for basic health check."""
-    return {"status": "ok", "message": "Welcome to the Real Estate Data Aggregator API"}
+    return {"status": "ok", "message": "Welcome to the Real Estate Data Aggregation API"}
 
 @app.post("/scrape", status_code=202, tags=["Scraping"])
 async def trigger_scrape(request: ScrapeRequest, background_tasks: BackgroundTasks):
@@ -53,21 +55,15 @@ async def trigger_scrape(request: ScrapeRequest, background_tasks: BackgroundTas
 
     return {"message": "Scraping process initiated in the background.", "addresses": request.addresses}
 
-@app.post("/scrape-county", tags=["Scraping"])
-def trigger_county_scrape(request: CountyScrapeRequest):
+@app.post("/scrape-county-bulk", tags=["County Scraping"])
+def trigger_county_bulk_scrape(request: CountyScrapeRequest):
     """
-    Accepts a single address and attempts to fetch data from county sources (ArcGIS or LLM fallback).
+    Accepts a county name and attempts to download and process its bulk data file.
     This is a synchronous endpoint that returns the result directly.
     """
-    from county_data_extractor import get_county_data
-
-    logger.info("Received county scrape request for address", address=request.address)
-    normalized_address = normalize_address(request.address)
-    county_data = get_county_data(normalized_address)
-
-    return county_data
-
-from etl import run_master_etl
+    logger.info("Received county bulk scrape request", county=request.county_name)
+    result = get_county_data(request.county_name)
+    return result
 
 @app.post("/run-etl", status_code=202, tags=["ETL"])
 async def trigger_etl(background_tasks: BackgroundTasks):
@@ -78,7 +74,7 @@ async def trigger_etl(background_tasks: BackgroundTasks):
     background_tasks.add_task(run_master_etl)
     return {"message": "ETL process for all ingested snapshots initiated in the background."}
 
-# --- Core Scraping Logic (modified for background tasks) ---
+# --- Core Scraping Logic ---
 
 async def run_scraper_for_property(db: Session, property_id: int, address_to_scrape: str, scraper_instance):
     """
@@ -111,8 +107,6 @@ async def run_scraper_for_property(db: Session, property_id: int, address_to_scr
             db.refresh(snapshot)
             logger.info("Successfully scraped and saved snapshot.", property_id=property_id, source=source_name, snapshot_id=snapshot.id)
 
-            # The ETL process is now decoupled and run via a separate API endpoint.
-
         else:
             logger.error("Scraper returned an error or no result.", property_id=property_id, source=source_name, result=result)
 
@@ -136,11 +130,9 @@ async def process_property(input_address: str):
     db = next(db_gen)
 
     try:
-        # Step 1: Normalize Address
         normalized = normalize_address(input_address)
         logger.info("Normalized address", input_address=input_address, normalized=normalized['canonical'])
 
-        # Step 2: Get or Create Property Record in DB
         property_record = db.query(Property).filter(Property.input_address == input_address).first()
         if not property_record:
             property_record = Property(
@@ -159,7 +151,6 @@ async def process_property(input_address: str):
             logger.error("Failed to get or create property record.", input_address=input_address)
             return
 
-        # Step 3: Initialize and run all scrapers concurrently
         scrapers = [
             ZillowScraper(),
             RedfinScraper(),

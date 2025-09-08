@@ -14,7 +14,10 @@ def run_master_etl():
         snapshots_to_process = db.query(RawSnapshot).filter(RawSnapshot.status == 'ingested').all()
         logger.info(f"Found {len(snapshots_to_process)} snapshots to process.")
         for snapshot in snapshots_to_process:
-            # The raw_payload from the DB contains the 'parsed_data' dictionary.
+            if not snapshot.raw_payload:
+                logger.warning("Snapshot has no raw_payload, skipping ETL.", snapshot_id=snapshot.id)
+                continue
+
             parsed_data = snapshot.raw_payload.get("parsed_data", {})
             run_etl(db, snapshot, parsed_data)
     finally:
@@ -23,8 +26,6 @@ def run_master_etl():
 def run_etl(db: Session, snapshot: RawSnapshot, parsed_data: dict):
     """
     Runs the ETL process for a given snapshot and its already-parsed data.
-    - Populates the structured history tables.
-    - Updates the snapshot status.
     """
     if not parsed_data or parsed_data.get("error"):
         logger.error("ETL Error: Parsed data contains an error or is empty.", snapshot_id=snapshot.id, error=parsed_data.get("error"))
@@ -37,7 +38,6 @@ def run_etl(db: Session, snapshot: RawSnapshot, parsed_data: dict):
 
     try:
         # --- Populate PropertyAttributesHistory ---
-        # 1. Set the previous 'current' record for this property/source to not current
         db.query(PropertyAttributesHistory).\
             filter(
                 PropertyAttributesHistory.property_id == snapshot.property_id,
@@ -46,7 +46,6 @@ def run_etl(db: Session, snapshot: RawSnapshot, parsed_data: dict):
             ).\
             update({"is_current": 0, "valid_to": snapshot.scraped_at})
 
-        # 2. Insert the new record
         new_attributes = PropertyAttributesHistory(
             property_id=snapshot.property_id,
             source_id=snapshot.source_id,
@@ -64,7 +63,6 @@ def run_etl(db: Session, snapshot: RawSnapshot, parsed_data: dict):
         db.add(new_attributes)
 
         # --- Populate AvmHistory ---
-        # Sale AVM
         if parsed_data.get("sale_avm"):
             sale_avm = AvmHistory(
                 property_id=snapshot.property_id,
@@ -76,7 +74,6 @@ def run_etl(db: Session, snapshot: RawSnapshot, parsed_data: dict):
             )
             db.add(sale_avm)
 
-        # Rent AVM
         if parsed_data.get("rent_avm"):
             rent_avm = AvmHistory(
                 property_id=snapshot.property_id,
@@ -88,7 +85,6 @@ def run_etl(db: Session, snapshot: RawSnapshot, parsed_data: dict):
             )
             db.add(rent_avm)
 
-        # --- Update Snapshot Status ---
         snapshot.status = "processed"
         db.commit()
         logger.info("ETL process completed successfully.", snapshot_id=snapshot.id)
