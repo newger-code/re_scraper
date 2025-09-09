@@ -1,8 +1,8 @@
-import express from 'express';
-import BookController from '../controllers/bookController';
+const express = require('express');
+const BookController = require('../controllers/bookController');
 
 const router = express.Router();
-const startRouter = keycloak => {
+const startRouter = (keycloak) => {
 
 
   router.get('/:id', keycloak.protect(), async (req, res) => {
@@ -28,5 +28,5 @@ const startRouter = keycloak => {
 };
 
 module.exports = {
-  router, startRouter
+  router, startRouter,
 };

@@ -1,12 +1,11 @@
-import express from 'express';
-import config from 'config';
-import onHealthCheck from '../common/healthcheck/healthcheck';
+const express = require('express');
+const config = require('config');
+const onHealthCheck = require('../common/healthcheck/healthcheck');
 
 const router = express.Router();
-const startRouter = keycloak => {
-
-  router.get('/', async (req, res) => {
-    res.end('');
+const startRouter = (keycloak) => {
+  router.get('/', (req, res) => {
+    res.send('UP');
   });
 
   router.get('/config', keycloak.protect('realm:admin'), (req, res) => {
@@ -20,5 +19,5 @@ const startRouter = keycloak => {
 };
 
 module.exports = {
-  router, startRouter
+  router, startRouter,
 };

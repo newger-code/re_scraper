@@ -33,8 +33,9 @@ node_modules
 /connect.lock
 /coverage
 /libpeerconnection.log
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 testem.log
 /typings
 .SAV
@@ -58,3 +59,6 @@ coverage
 .scannerwork
 
 lib
+app.log
+dev_server.log
+error.log

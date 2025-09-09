@@ -1,22 +1,25 @@
-import session from 'express-session';
-import createError from 'http-errors';
-import morgan from 'morgan';
-import http from 'http';
-import express from 'express';
-import cors from 'cors';
-import config from 'config';
-import connectRedis from 'connect-redis';
-import bodyParser from 'body-parser';
-import helmet from 'helmet';
-import KeycloakMultirealm from 'keycloak-connect-multirealm';
-import cookieParser from 'cookie-parser';
-
-import serverErrorHandler from './common/ServerErrorHandler';
-import logger from './common/logger';
-import client from './common/redis';
-
+const session = require('express-session');
+const createError = require('http-errors');
+const morgan = require('morgan');
+const http = require('http');
+const express = require('express');
+const cors = require('cors');
+const config = require('config');
+const connectRedis = require('connect-redis');
+const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const KeycloakMultirealm = require('keycloak-connect-multirealm');
+const cookieParser = require('cookie-parser');
+const logger = require('./common/logger').default;
+const client = require('./common/redis').default;
+const serverErrorHandler = require('./common/ServerErrorHandler');
 const bookRouter = require('./routes/book');
-const indexRouter = require('./routes');
+const indexRouter = require('./routes/index');
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Application specific logging, throwing an error, or other logic here
+});
 
 const RedisStore = connectRedis(session);
 const app = express();
@@ -87,6 +90,6 @@ const server = http.createServer(app);
 
 server.listen(port, () => {
   logger.info(`Service [${config.name}:${config.version}] running on port [${port}]`);
-}).on('error', serverErrorHandler);
+}).on('error', serverErrorHandler(port));
 
 module.exports = app;

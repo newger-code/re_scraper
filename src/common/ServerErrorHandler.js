@@ -1,4 +1,4 @@
-module.exports = (port, error) => {
+module.exports = (port) => (error) => {
   if (error.syscall !== 'listen') {
     throw error;
   }
