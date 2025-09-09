@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "scripts": {
     "start": "node dist/lib/app",
-    "dev": "nodemon dist/lib/app",
+    "dev": "nodemon --watch dev --exec 'npm run build'",
     "cron": "nodemon dist/lib/cron/cron",
-    "build": "gulp build && jest && gulp dev",
+    "build": "gulp build && jest && node dist/lib/app",
     "test": "jest --detectOpenHandles",
     "qa": "NODE_ENV=qa node dist/lib/app"
   },
@@ -58,6 +58,7 @@
     "@babel/plugin-transform-async-to-generator": "^7.12.1",
     "@babel/plugin-transform-runtime": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
+    "chokidar-cli": "^3.0.0",
     "eslint": "^7.11.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-airbnb-babel": "^0.2.1",
