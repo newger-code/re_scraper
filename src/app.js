@@ -12,10 +12,11 @@ import KeycloakMultirealm from 'keycloak-connect-multirealm';
 import cookieParser from 'cookie-parser';
 
 import serverErrorHandler from './common/ServerErrorHandler';
-import bookRouter from './routes/book';
-import indexRouter from './routes';
 import logger from './common/logger';
 import client from './common/redis';
+
+const bookRouter = require('./routes/book');
+const indexRouter = require('./routes');
 
 const RedisStore = connectRedis(session);
 const app = express();

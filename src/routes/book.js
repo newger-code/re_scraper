@@ -1,6 +1,5 @@
 import express from 'express';
-import bookController from '../controllers/bookController';
-import restUtil from '../common/util/RestUtil';
+import BookController from '../controllers/bookController';
 
 const router = express.Router();
 const startRouter = keycloak => {
@@ -8,8 +7,8 @@ const startRouter = keycloak => {
 
   router.get('/:id', keycloak.protect(), async (req, res) => {
     try {
-      const {id} = req.params;
-      const book = await bookController.getBook(id);
+      const { id } = req.params;
+      const book = await BookController.getBook(id);
       res.json(book);
     } catch (err) {
       res.json({ error: err.message });
@@ -20,7 +19,7 @@ const startRouter = keycloak => {
   router.post('/', keycloak.protect(), async (req, res) => {
     try {
       const data = req.body;
-      const book = await bookController.addBook(data);
+      const book = await BookController.addBook(data);
       res.json(book);
     } catch (err) {
       res.json({ error: err.message });

@@ -1,11 +1,7 @@
-import {db} from '../common/db';
+import { db } from '../common/db';
 
 class BookController {
-  constructor() {
-    this.db = db;
-  }
-
-  async getBook(id) {
+  static async getBook(id) {
     try {
       return db.oneOrNone(`select *
                            from book
@@ -15,7 +11,7 @@ class BookController {
     }
   }
 
-  async addBook(data) {
+  static async addBook(data) {
     try {
       return db.one(`
           insert into book(author, title)
@@ -28,5 +24,4 @@ class BookController {
   }
 }
 
-const bookController = new BookController();
-export default bookController;
+export default BookController;

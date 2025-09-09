@@ -1,5 +1,5 @@
 import redis from 'redis';
-const config = require('config');
+import config from 'config';
 
 const redisClient = redis.createClient({
   host: config.redis.host,

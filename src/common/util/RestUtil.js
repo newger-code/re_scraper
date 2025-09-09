@@ -1,8 +1,8 @@
-import jwt_decode from 'jwt-decode';
+import jwtDecode from 'jwt-decode';
 
 const getToken = (req) => {
   const token = req.session['keycloak-token'] || req.headers.authorization.substring(7);
-  return jwt_decode(token);
+  return jwtDecode(token);
 };
 const getRealm = (req) => {
   return req.headers.realm || req.query.realm;
