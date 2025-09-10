@@ -60,3 +60,4 @@ gulp.task('sonar', sonar);
 gulp.task('templates', templates);
 gulp.task('build', gulp.series(lint, babelify, templates, jsDoc3));
 gulp.task('dev', watchFiles);
+gulp.task('watch', watchFiles);

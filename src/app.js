@@ -10,8 +10,9 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const KeycloakMultirealm = require('keycloak-connect-multirealm');
 const cookieParser = require('cookie-parser');
-const logger = require('./common/logger').default;
-const client = require('./common/redis').default;
+const path = require('path');
+const logger = require('./common/logger');
+const client = require('./common/redis');
 const serverErrorHandler = require('./common/ServerErrorHandler');
 const bookRouter = require('./routes/book');
 const indexRouter = require('./routes/index');
@@ -28,13 +29,13 @@ const { port } = config.http;
 
 app.set('port', port);
 app.use(cors(config.http.cors));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cookieParser());
 app.use(helmet({
   frameguard: false
 }));

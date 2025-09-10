@@ -1,9 +1,9 @@
-import redis from 'redis';
-import config from 'config';
+const redis = require('redis');
+const config = require('config');
 
-const redisClient = redis.createClient({
+const client = redis.createClient({
   host: config.redis.host,
   port: config.redis.port,
 });
 
-export default redisClient;
+module.exports = client;

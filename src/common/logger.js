@@ -1,8 +1,6 @@
-import config from 'config';
-
-import { addColors, createLogger, format, transports } from 'winston';
-
-import { ElasticsearchTransport } from 'winston-elasticsearch';
+const config = require('config');
+const { addColors, createLogger, format, transports } = require('winston');
+const { ElasticsearchTransport } = require('winston-elasticsearch');
 
 require('winston-daily-rotate-file');
 
@@ -77,15 +75,13 @@ if (config.logs.elastic.enabled) {
     level: config.logs.level,
     handleExceptions: false,
     clientOpts: {
-      node: {
-        url: new URL(config.logs.elastic.host),
-        auth: {
-          username: config.logs.elastic.username,
-          password: config.logs.elastic.password
-        },
-      }
+      node: config.logs.elastic.host,
+      auth: {
+        username: config.logs.elastic.username,
+        password: config.logs.elastic.password
+      },
     }
   }));
 }
 
-export default logger;
+module.exports = logger;

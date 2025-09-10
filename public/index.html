@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Application Status</title>
+  <style>
+    body { font-family: sans-serif; }
+    h1 { color: #333; }
+    pre { background-color: #f4f4f4; padding: 10px; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>Application Status</h1>
+  <h2>Root Endpoint (/)</h2>
+  <pre id="root-output"></pre>
+  <h2>Health Check Endpoint (/healthcheck)</h2>
+  <pre id="healthcheck-output"></pre>
+  <script>
+    fetch('/')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('root-output').textContent = data;
+      })
+      .catch(error => {
+        document.getElementById('root-output').textContent = 'Error: ' + error;
+      });
+
+    fetch('/healthcheck')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('healthcheck-output').textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(error => {
+        document.getElementById('healthcheck-output').textContent = 'Error: ' + error;
+      });
+  </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { db } from '../common/db';
+const { db } = require('../common/db');
 
 class BookController {
   static async getBook(id) {
@@ -24,4 +24,4 @@ class BookController {
   }
 }
 
-export default BookController;
+module.exports = BookController;

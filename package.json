@@ -3,11 +3,12 @@
   "version": "0.0.1",
   "scripts": {
     "start": "node dist/lib/app",
-    "dev": "nodemon --watch dev --exec 'npm run build'",
-    "cron": "nodemon dist/lib/cron/cron",
-    "build": "gulp build && jest && node dist/lib/app",
-    "test": "jest --detectOpenHandles",
-    "qa": "NODE_ENV=qa node dist/lib/app"
+    "start": "node dist/lib/app.js",
+    "dev": "nodemon --watch src --exec 'npm run build'",
+    "build": "gulp build",
+    "test": "jest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -80,6 +81,7 @@
     "jest-plugin-context": "^2.9.0",
     "jest-sonar-reporter": "^2.0.0",
     "nodemon": "^2.0.6",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.1.2",
     "rimraf": "^3.0.2",
     "sonarqube-scanner": "^2.7.0"
