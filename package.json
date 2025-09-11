@@ -5,7 +5,7 @@
     "start": "node dist/lib/app",
     "dev": "nodemon dist/lib/app",
     "cron": "nodemon dist/lib/cron/cron",
-    "build": "gulp build && jest && gulp dev",
+    "build": "gulp build",
     "test": "jest --detectOpenHandles",
     "qa": "NODE_ENV=qa node dist/lib/app"
   },
